@@ -8,6 +8,7 @@ namespace CommandPrompt0
 {
     public class Game
     {
+        History history;
         
         string _commandentry;
         public event EventHandler SystemResponse;
@@ -17,6 +18,8 @@ namespace CommandPrompt0
         public Game()
         {
             LoadMainCommands();
+            history = new History();
+
 
         }
 
@@ -25,6 +28,7 @@ namespace CommandPrompt0
             _commandentry = CommandEntry;
             ResponseEventArgs responseEventArgs = new ResponseEventArgs(Response());
             OnSystemResponse(responseEventArgs );
+            history.Add(CommandEntry);
             return _commandentry;
        
         }
@@ -69,27 +73,33 @@ namespace CommandPrompt0
             maincommands["Logout"] = new Func<string, string>(GetLogoutResult);
             maincommands["Login"] = new Func<string, string>(GetLoginResult);
             maincommands["Inbox"] = new Func<string, string>(GetInboxResult);
+            maincommands["History"] = new Func<string, string>(GetHistoryResult);
             //maincommands.Add("Message", "Reading a message.");
             //maincommands.Add("To:", "Creating a message");
             //maincommands.Add("Help", "Getting Help.");
             //maincommands.Add("Search", "Searching the system.");
         }
 
-        static string GetLogoutResult(string CommandString)
+        string GetLogoutResult(string CommandString)
         {
             return "You are logging out of the system:  " + CommandString;
         }
 
-        static string GetLoginResult(string UserName)
+        string GetLoginResult(string UserName)
         {
             return "You are logging in as:  " + GetCommandSecondPart(UserName);
         }
 
-        static string GetInboxResult(string CommandString)
+        string GetInboxResult(string CommandString)
         {
             return "Listing the contents of your inbox.";
         }
 
+        string GetHistoryResult(string HistoryRequest)
+        {
+            // unfortunately the HistoryRequest parameter is required to be consistent
+            return history.GetList();   
+        }
         static string GetCommandWord(string CommandToParse)
         {
             var _commandwords = CommandToParse.Split(' ');
@@ -102,7 +112,7 @@ namespace CommandPrompt0
         {
             string[] commandparts = CommandToParse.Split(new char[] { ' ' }, 2);
             string secondpartofcommand;
-            if (commandparts[1] != null)
+            if (commandparts.Length > 1 && commandparts[1]  != null)
             {
                 secondpartofcommand =  commandparts[1].ToString();
             }
